@@ -33,7 +33,7 @@ export default function Home() {
         background: 'linear-gradient(to bottom right, #ffffff, #f5f5f5)',
       }}>
         <Typography variant="h3" component="h1" gutterBottom sx={{ fontWeight: 600 }}>
-          Welcome to DataViz
+          Welcome to Glimpse
         </Typography>
         <Typography variant="h6" color="text.secondary" sx={{ mb: 4 }}>
           Your simple yet powerful data visualization tool
