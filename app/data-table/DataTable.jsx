@@ -26,12 +26,9 @@ import {
   Chip,
   InputAdornment,
   IconButton,
-  Tooltip,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 // Enhanced Filter component
 const Filter = ({ column }) => {
@@ -44,7 +41,7 @@ const Filter = ({ column }) => {
       value={columnFilterValue ?? ''}
       onChange={(e) => column.setFilterValue(e.target.value)}
       placeholder={`Search ${column.columnDef.header}...`}
-      sx={{ marginTop: 1, marginBottom: 1, width: '100%' }}
+      sx={{ width: '100%', mb: 1 }}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
@@ -98,12 +95,6 @@ export default function DataTable({ data, columns }) {
 
   if (!isMounted) return null;
 
-  // Helper to get the sort direction icon
-  const getSortDirectionIcon = (direction) => {
-    if (!direction) return null;
-    return direction === 'asc' ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />;
-  };
-
   return (
     <Box sx={{ width: '100%' }}>
       {/* Global Search Bar */}
@@ -155,69 +146,60 @@ export default function DataTable({ data, columns }) {
           <Table stickyHeader>
             <TableHead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <TableCell
-                      key={header.id}
-                      sx={{ 
-                        fontWeight: 'bold', 
-                        backgroundColor: '#f5f5f5',
-                        color: '#333',
-                        padding: '16px',
-                        borderBottom: '2px solid #ddd'
-                      }}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                          {header.column.getCanSort() ? (
-                            <Tooltip title={
-                              header.column.getIsSorted() === false 
-                                ? "Click to sort ascending" 
-                                : header.column.getIsSorted() === "asc" 
-                                  ? "Click to sort descending" 
-                                  : "Click to remove sorting"
-                            }>
-                              <Box
-                                onClick={header.column.getToggleSortingHandler()}
-                                style={{ cursor: 'pointer' }}
-                                sx={{ 
-                                  display: 'flex', 
-                                  alignItems: 'center', 
-                                  justifyContent: 'space-between',
-                                  '&:hover': {
-                                    color: 'primary.main'
-                                  }
-                                }}
-                              >
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  {flexRender(
-                                    header.column.columnDef.header,
-                                    header.getContext()
-                                  )}
-                                  <TableSortLabel
-                                    active={header.column.getIsSorted() !== false}
-                                    direction={header.column.getIsSorted() || 'asc'}
-                                    sx={{ ml: 0.5 }}
-                                  />
-                                </Box>
-                              </Box>
-                            </Tooltip>
-                          ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              {flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
-                            </Box>
-                          )}
-                          {header.column.getCanFilter() && (
-                            <Filter column={header.column} />
-                          )}
-                        </Box>
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
+                <>
+                  {/* First Row: Search Boxes */}
+                  <TableRow key={`${headerGroup.id}-filters`}>
+                    {headerGroup.headers.map((header) => (
+                      <TableCell
+                        key={`${header.id}-filter`}
+                        sx={{ 
+                          backgroundColor: '#f5f5f5',
+                          padding: '16px 16px 8px 16px',
+                          borderBottom: 'none'
+                        }}
+                      >
+                        {!header.isPlaceholder && header.column.getCanFilter() && (
+                          <Filter column={header.column} />
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                  
+                  {/* Second Row: Column Headers */}
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableCell
+                        key={header.id}
+                        sx={{ 
+                          fontWeight: 'bold', 
+                          backgroundColor: '#f5f5f5',
+                          color: '#333',
+                          padding: '8px 16px 16px 16px',
+                          borderBottom: '2px solid #ddd'
+                        }}
+                      >
+                        {header.isPlaceholder ? null : (
+                          <Box
+                            onClick={header.column.getToggleSortingHandler()}
+                            style={{ cursor: 'pointer' }}
+                            sx={{ display: 'flex', alignItems: 'center' }}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                            {header.column.getCanSort() && (
+                              <TableSortLabel
+                                active={header.column.getIsSorted() !== false}
+                                direction={header.column.getIsSorted() || 'asc'}
+                              />
+                            )}
+                          </Box>
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                </>
               ))}
             </TableHead>
             <TableBody>
