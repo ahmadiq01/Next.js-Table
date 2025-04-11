@@ -95,6 +95,69 @@ export default function DataTable({ data, columns }) {
 
   if (!isMounted) return null;
 
+  // Generate all header rows as individual TableRow components
+  // Instead of using fragments, create a flat array of TableRow components
+  const headerRows = [];
+  
+  table.getHeaderGroups().forEach((headerGroup) => {
+    // Add filter row
+    headerRows.push(
+      <TableRow key={`${headerGroup.id}-filters`}>
+        {headerGroup.headers.map((header) => (
+          <TableCell
+            key={`${header.id}-filter`}
+            sx={{ 
+              backgroundColor: '#f5f5f5',
+              padding: '16px 16px 8px 16px',
+              borderBottom: 'none'
+            }}
+          >
+            {!header.isPlaceholder && header.column.getCanFilter() && (
+              <Filter column={header.column} />
+            )}
+          </TableCell>
+        ))}
+      </TableRow>
+    );
+    
+    // Add header row
+    headerRows.push(
+      <TableRow key={headerGroup.id}>
+        {headerGroup.headers.map((header) => (
+          <TableCell
+            key={header.id}
+            sx={{ 
+              fontWeight: 'bold', 
+              backgroundColor: '#f5f5f5',
+              color: '#333',
+              padding: '8px 16px 16px 16px',
+              borderBottom: '2px solid #ddd'
+            }}
+          >
+            {header.isPlaceholder ? null : (
+              <Box
+                onClick={header.column.getToggleSortingHandler()}
+                style={{ cursor: 'pointer' }}
+                sx={{ display: 'flex', alignItems: 'center' }}
+              >
+                {flexRender(
+                  header.column.columnDef.header,
+                  header.getContext()
+                )}
+                {header.column.getCanSort() && (
+                  <TableSortLabel
+                    active={header.column.getIsSorted() !== false}
+                    direction={header.column.getIsSorted() || 'asc'}
+                  />
+                )}
+              </Box>
+            )}
+          </TableCell>
+        ))}
+      </TableRow>
+    );
+  });
+
   return (
     <Box sx={{ width: '100%' }}>
       {/* Global Search Bar */}
@@ -145,62 +208,7 @@ export default function DataTable({ data, columns }) {
         <TableContainer sx={{ maxHeight: 440 }}>
           <Table stickyHeader>
             <TableHead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <>
-                  {/* First Row: Search Boxes */}
-                  <TableRow key={`${headerGroup.id}-filters`}>
-                    {headerGroup.headers.map((header) => (
-                      <TableCell
-                        key={`${header.id}-filter`}
-                        sx={{ 
-                          backgroundColor: '#f5f5f5',
-                          padding: '16px 16px 8px 16px',
-                          borderBottom: 'none'
-                        }}
-                      >
-                        {!header.isPlaceholder && header.column.getCanFilter() && (
-                          <Filter column={header.column} />
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                  
-                  {/* Second Row: Column Headers */}
-                  <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map((header) => (
-                      <TableCell
-                        key={header.id}
-                        sx={{ 
-                          fontWeight: 'bold', 
-                          backgroundColor: '#f5f5f5',
-                          color: '#333',
-                          padding: '8px 16px 16px 16px',
-                          borderBottom: '2px solid #ddd'
-                        }}
-                      >
-                        {header.isPlaceholder ? null : (
-                          <Box
-                            onClick={header.column.getToggleSortingHandler()}
-                            style={{ cursor: 'pointer' }}
-                            sx={{ display: 'flex', alignItems: 'center' }}
-                          >
-                            {flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                            {header.column.getCanSort() && (
-                              <TableSortLabel
-                                active={header.column.getIsSorted() !== false}
-                                direction={header.column.getIsSorted() || 'asc'}
-                              />
-                            )}
-                          </Box>
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </>
-              ))}
+              {headerRows}
             </TableHead>
             <TableBody>
               {table.getRowModel().rows.length > 0 ? (
